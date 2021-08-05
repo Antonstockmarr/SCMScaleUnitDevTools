@@ -83,8 +83,7 @@ namespace ScaleUnitManagement.ScaleUnitFeatureManager.Utilities
                 + "," + CommandExecutor.Quotes + "2.5.29.37={critical}{text}1.3.6.1.5.5.7.3.1" + CommandExecutor.Quotes
                 + "," + CommandExecutor.Quotes + "2.5.29.17={critical}{text}DNS=" + certificateSubject + CommandExecutor.Quotes + ")";
 
-            CommandExecutor ce = new CommandExecutor();
-            ce.RunCommand(cmd);
+            CommandExecutor.RunCommand(cmd);
         }
 
         internal static string PersonalCertificateStoreName => "MY";

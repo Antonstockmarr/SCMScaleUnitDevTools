@@ -36,8 +36,7 @@ EXEC sys.sp_set_session_context @key = N'ActiveScaleUnitId', @value = '@A';
 
             string cmd = "Invoke-Sqlcmd -Query " + CommandExecutor.Quotes + sqlQuery + CommandExecutor.Quotes + " -QueryTimeout 65535";
 
-            CommandExecutor ce = new CommandExecutor();
-            ce.RunCommand(cmd);
+            CommandExecutor.RunCommand(cmd);
 
             return Task.CompletedTask;
         }

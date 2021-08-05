@@ -36,8 +36,7 @@ END
 
             string cmd = "Invoke-SqlCmd -Query " + CommandExecutor.Quotes + sqlQuery + CommandExecutor.Quotes + " -QueryTimeout 65535";
 
-            CommandExecutor ce = new CommandExecutor();
-            ce.RunCommand(cmd);
+            CommandExecutor.RunCommand(cmd);
 
             return Task.CompletedTask;
         }

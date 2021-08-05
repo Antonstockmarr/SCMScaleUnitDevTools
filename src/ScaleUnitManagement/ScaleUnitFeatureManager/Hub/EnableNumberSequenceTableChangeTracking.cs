@@ -28,8 +28,7 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.change_tracking_tables WHERE object_id = 
 
             string cmd = "Invoke-Sqlcmd -Query " + CommandExecutor.Quotes + sqlQuery + CommandExecutor.Quotes + " -QueryTimeout 65535";
 
-            CommandExecutor ce = new CommandExecutor();
-            ce.RunCommand(cmd);
+            CommandExecutor.RunCommand(cmd);
 
             return Task.CompletedTask;
         }
