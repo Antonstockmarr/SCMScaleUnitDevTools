@@ -12,7 +12,7 @@ namespace CLI.SetupToolsOptions
         public override async Task Show(int input, string selectionHistory)
         {
             List<CLIOption> options = SelectScaleUnitOptions(RunSyncDB);
-            var screen = new CLIScreen(options, selectionHistory, "Please select the database you would like to sync:\n", "\nDatabase to sync: ");
+            var screen = new SingleSelectScreen(options, selectionHistory, "Please select the database you would like to sync:\n", "\nDatabase to sync: ");
             await CLIController.ShowScreen(screen);
         }
 

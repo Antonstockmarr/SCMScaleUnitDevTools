@@ -15,7 +15,7 @@ namespace CLI
         public override async Task Show(int input, string selectionHistory)
         {
             List<CLIOption> options = SelectScaleUnitOptions(PrintAvailableStepsForScaleUnit);
-            var screen = new CLIScreen(options, selectionHistory, "Environments:\n", "\nWhich environment would you like to configure?: ");
+            var screen = new SingleSelectScreen(options, selectionHistory, "Environments:\n", "\nWhich environment would you like to configure?: ");
             await CLIController.ShowScreen(screen);
         }
 
@@ -43,33 +43,30 @@ namespace CLI
 
             foreach (IStep step in availableSteps)
             {
-                options.Add(new CLIOption() { Name = step.Label(), Command = RunStepsFromTask });
+                options.Add(new CLIOption() { Name = step.Label(), Command = RunStep });
             }
 
             ScaleUnitInstance scaleUnit = Config.FindScaleUnitWithId(ScaleUnitContext.GetScaleUnitId());
-            var screen = new CLIScreen(options, selectionHistory, $"Task sequence to run for {scaleUnit.PrintableName()}\n", "\nSelect task to start from: ");
+            string helpMessage = $"Please select steps you would only like to run by supplying the step numbers to run\n" +
+                $"in a comma separated list, e.g. \"1,2,5,6\", or skip specific steps by supplying the negative step numbers\n" +
+                $"to skip in a comma separated list, e.g. \"-3,-4\".\n" +
+                $"\nTasks to run for {scaleUnit.PrintableName()}:\n";
+
+            CLIScreen screen = new MultiSelectScreen(options, selectionHistory, helpMessage, "\nSelect tasks to run/skip: ");
             await CLIController.ShowScreen(screen);
         }
 
-        private async Task RunStepsFromTask(int input, string selectionHistory)
+        private async Task RunStep(int input, string selectionHistory)
         {
-            for (int i = input - 1; i < availableSteps.Count; i++)
+            try
             {
-                try
-                {
-                    Console.WriteLine("Executing step: " + availableSteps[i].Label());
-                    await availableSteps[i].Run();
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error occurred while enabling scale unit feature:\n{ex}");
-
-                    if (!CLIController.YesNoPrompt("Step " + availableSteps[i].Label() + " failed to complete successfuly. Do you want to continue? [y]: "))
-                        break;
-                }
+                Console.WriteLine("Executing step: " + availableSteps[input].Label());
+                await availableSteps[input].Run();
             }
-
-            Console.WriteLine("Done");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error occurred while enabling scale unit feature:\n{ex}");
+            }
         }
     }
 }

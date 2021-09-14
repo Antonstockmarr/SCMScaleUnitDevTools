@@ -12,7 +12,7 @@ namespace CLI
         public override async Task Show(int input, string selectionHistory)
         {
             System.Collections.Generic.List<CLIOption> options = SelectScaleUnitOptions(DeleteWorkloadsFromScaleUnit);
-            var screen = new CLIScreen(options, selectionHistory, "Environments:\n", "\nWhich environment would you like to delete all workloads from?: ");
+            var screen = new SingleSelectScreen(options, selectionHistory, "Environments:\n", "\nWhich environment would you like to delete all workloads from?: ");
             await CLIController.ShowScreen(screen);
         }
 

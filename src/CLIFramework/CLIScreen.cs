@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CLIFramework
 {
-    public class CLIScreen
+    public abstract class CLIScreen
     {
         public CLIScreen previousScreen = null;
         public List<CLIOption> options = null;
@@ -21,5 +22,10 @@ namespace CLIFramework
             this.infoBeforeOptions = infoBeforeOptions;
             this.infoAfterOptions = infoAfterOptions;
         }
+
+        /// <summary>
+        /// This function performs the action indicated by the user's input. 
+        /// </summary>
+        public abstract Task PerformAction();
     }
 }

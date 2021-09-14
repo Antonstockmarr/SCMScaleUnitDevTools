@@ -34,7 +34,7 @@ namespace CLIFramework
             while (screen.state == CLIScreenState.Incomplete)
             {
                 PrintScreen(screen);
-                await PerformScreenAction(screen);
+                await screen.PerformAction();
             }
 
             currentScreen = screen.previousScreen;
@@ -46,7 +46,7 @@ namespace CLIFramework
         /// <param name="screen">The <c>CLIScreen</c> object to print.</param>
         private static void PrintScreen(CLIScreen screen)
         {
-            var totalOptions = screen.options.Count;
+            int totalOptions = screen.options.Count;
 
             if (totalOptions == 0)
             {
@@ -89,49 +89,6 @@ namespace CLIFramework
             else
             {
                 Console.WriteLine("\t" + currOptionNumber.ToString() + ". " + "Exit");
-            }
-        }
-
-        /// <summary>
-        /// This function performs the action indicated by the user's input. 
-        /// </summary>
-        private static async Task PerformScreenAction(CLIScreen screen)
-        {
-            int totalOptions = screen.options.Count;
-            string input = Console.ReadLine();
-            if (int.TryParse(input, out int enteredNumber))
-            {
-                if (enteredNumber >= 1 && enteredNumber <= totalOptions)
-                {
-                    screen.state = CLIScreenState.Complete;
-                    await screen.options[enteredNumber - 1].Command(enteredNumber, string.IsNullOrEmpty(screen.selectionHistory) ? screen.options[enteredNumber - 1].Name : screen.selectionHistory + " -> " + screen.options[enteredNumber - 1].Name);
-                }
-
-                else if (enteredNumber == totalOptions + 1)
-                {
-                    if (screen.previousScreen != null)
-                    {
-                        screen.previousScreen.state = CLIScreenState.Incomplete; // show previous screen again.
-                        screen.state = CLIScreenState.Complete;
-                    }
-                    else
-                    {
-                        repeat = false;
-                        screen.state = CLIScreenState.Complete;
-                    }
-                    return;
-                }
-
-                else
-                {
-                    screen.inputValidationError = "Operation " + enteredNumber + " not found. Please enter the number for the operation you like to start.";
-                    return;
-                }
-            }
-            else
-            {
-                screen.inputValidationError = "Invalid input. Please enter a number.";
-                return;
             }
         }
 

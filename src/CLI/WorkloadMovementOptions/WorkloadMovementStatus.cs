@@ -12,7 +12,7 @@ namespace CLI.WorkloadMovementOptions
         {
             List<CLIOption> options = SelectScaleUnitOptions(ShowWorkloadMovementStatusForScaleUnit);
 
-            var screen = new CLIScreen(options, selectionHistory, "Show status of workload movement on:\n", "\nEnvironment?: ");
+            var screen = new SingleSelectScreen(options, selectionHistory, "Show status of workload movement on:\n", "\nEnvironment?: ");
             await CLIController.ShowScreen(screen);
         }
 
