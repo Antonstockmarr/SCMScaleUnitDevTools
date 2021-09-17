@@ -11,49 +11,37 @@ namespace CLIFramework
 
         public override async Task PerformAction()
         {
-            int totalOptions = options.Count;
+            var allOptions = new List<CLIOption>();
+            allOptions.AddRange(options);
+            allOptions.AddRange(navigationOptions);
+            int totalOptions = allOptions.Count;
 
             string input = Console.ReadLine();
 
-            if (int.TryParse(input, out int cancel))
+            if (int.TryParse(input, out int enteredNumber))
             {
-                if (cancel == totalOptions + 1)
+                if (enteredNumber > options.Count && enteredNumber <= totalOptions)
                 {
-                    previousScreen.state = CLIScreenState.Incomplete; // show previous screen again.
                     state = CLIScreenState.Complete;
+                    await RunCommand(allOptions, enteredNumber);
                     return;
                 }
             }
 
-            string[] enteredNumbers = input.Split(',');
+            string[] commaSeparatedInput = input.Split(',');
 
             var runSteps = new List<int>();
             var skipSteps = new List<int>();
 
-            foreach (string number in enteredNumbers)
+            try
             {
-                number.Trim();
-                if (int.TryParse(number, out int step))
-                {
-                    if (step >= 1 && step <= totalOptions)
-                    {
-                        runSteps.Add(step - 1);
-                    }
-                    else if (step <= -1 && step >= -totalOptions)
-                    {
-                        skipSteps.Add(-(step) - 1);
-                    }
-                    else
-                    {
-                        inputValidationError = $"Operation {step} not found. Please enter the number for the operation you like to start.";
-                        return;
-                    }
-                }
-                else
-                {
-                    inputValidationError = $"Invalid input. {number} is not a number.";
-                    return;
-                }
+                int[] enteredNumbers = ParseInputList(commaSeparatedInput);
+                DivideBySign(enteredNumbers, runSteps, skipSteps);
+            }
+            catch (Exception ex)
+            {
+                inputValidationError = ex.Message;
+                return;
             }
 
             if (runSteps.Count > 0 && skipSteps.Count > 0)
@@ -63,24 +51,71 @@ namespace CLIFramework
             }
 
             state = CLIScreenState.Complete;
-            if (skipSteps.Count > 0)
+            if (runSteps.Count == 0)
             {
-                for (int i = 0; i < totalOptions; i++)
+                runSteps = FindStepsNotSkipped(skipSteps);
+            }
+
+            runSteps.Sort();
+            for (int i = 0; i < runSteps.Count; i++)
+            {
+                await RunCommand(options, runSteps[i]);
+            }
+        }
+
+        private List<int> FindStepsNotSkipped(List<int> skipSteps)
+        {
+            var runSteps = new List<int>();
+
+            for (int step = 1; step <= options.Count; step++)
+            {
+                if (!skipSteps.Contains(step))
                 {
-                    if (!skipSteps.Contains(i))
-                    {
-                        await options[i].Command(i, string.IsNullOrEmpty(selectionHistory) ? options[i].Name : selectionHistory + " -> " + options[i].Name);
-                    }
+                    runSteps.Add(step);
                 }
             }
-            else
+            return runSteps;
+        }
+
+        private void DivideBySign(int[] enteredNumbers, List<int> positives, List<int> negatives)
+        {
+            foreach (int number in enteredNumbers)
             {
-                runSteps.Sort();
-                for (int i = 0; i < runSteps.Count; i++)
+                if (number < 0)
                 {
-                    await options[runSteps[i]].Command(runSteps[i], string.IsNullOrEmpty(selectionHistory) ? options[runSteps[i]].Name : selectionHistory + " -> " + options[runSteps[i]].Name);
+                    negatives.Add(-number);
+                }
+                else
+                {
+                    positives.Add(number);
                 }
             }
+        }
+
+        private int[] ParseInputList(string[] commaSeparatedInput)
+        {
+            int[] numbers = new int[commaSeparatedInput.Length];
+            for (int i = 0; i < commaSeparatedInput.Length; i++)
+            {
+                string substring = commaSeparatedInput[i];
+                substring.Trim();
+                if (int.TryParse(substring, out int number))
+                {
+                    numbers[i] = number;
+                }
+                else
+                {
+                    throw new Exception($"Invalid input. { substring } is not a number.");
+                }
+            }
+            foreach (int number in numbers)
+            {
+                if (number < -options.Count || number > options.Count || number == 0)
+                {
+                    throw new Exception($"Operation {number} not found.");
+                }
+            }
+            return numbers;
         }
     }
 }

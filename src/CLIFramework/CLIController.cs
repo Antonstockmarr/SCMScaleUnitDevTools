@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CLIFramework
@@ -30,14 +31,47 @@ namespace CLIFramework
         {
             screen.previousScreen = currentScreen;
             currentScreen = screen;
+            AddNavigationOptions(screen);
 
             while (screen.state == CLIScreenState.Incomplete)
             {
                 PrintScreen(screen);
+
                 await screen.PerformAction();
             }
 
             currentScreen = screen.previousScreen;
+        }
+
+        private static void AddNavigationOptions(CLIScreen screen)
+        {
+            if (screen.navigationOptions.Count == 0)
+            {
+                if (screen.previousScreen is null)
+                {
+                    screen.navigationOptions.Add(new CLIOption() { Name = "Exit", Command = ExitCLI });
+                }
+                else
+                {
+                    screen.navigationOptions.Add(new CLIOption() { Name = "Back", Command = BackToPreviousMenu(screen) });
+                }
+            }
+        }
+
+        private static Task ExitCLI(int input, string selectionHistory)
+        {
+            repeat = false;
+            return Task.CompletedTask;
+        }
+
+        private static Func<int, string, Task> BackToPreviousMenu(CLIScreen screen)
+        {
+            return (input, selectionHistory) =>
+            {
+                screen.state = CLIScreenState.Complete;
+                screen.previousScreen.state = CLIScreenState.Incomplete;
+                return Task.CompletedTask;
+            };
         }
 
         /// <summary>
@@ -82,14 +116,12 @@ namespace CLIFramework
                 currOptionNumber++;
             }
 
-            if (screen.previousScreen != null)
+            foreach (CLIOption option in screen.navigationOptions)
             {
-                Console.WriteLine("\t" + currOptionNumber.ToString() + ". " + "Back");
+                Console.WriteLine("\t" + currOptionNumber.ToString() + ". " + option.Name);
+                currOptionNumber++;
             }
-            else
-            {
-                Console.WriteLine("\t" + currOptionNumber.ToString() + ". " + "Exit");
-            }
+
         }
 
         public static bool YesNoPrompt(string message)

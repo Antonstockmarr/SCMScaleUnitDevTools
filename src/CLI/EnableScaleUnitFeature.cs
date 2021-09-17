@@ -60,8 +60,8 @@ namespace CLI
         {
             try
             {
-                Console.WriteLine("Executing step: " + availableSteps[input].Label());
-                await availableSteps[input].Run();
+                Console.WriteLine("Executing step: " + availableSteps[input - 1].Label());
+                await availableSteps[input - 1].Run();
             }
             catch (Exception ex)
             {

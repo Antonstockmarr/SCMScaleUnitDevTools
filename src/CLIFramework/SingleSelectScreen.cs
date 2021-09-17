@@ -11,23 +11,20 @@ namespace CLIFramework
 
         public override async Task PerformAction()
         {
-            int totalOptions = options.Count;
+            var allOptions = new List<CLIOption>();
+            allOptions.AddRange(options);
+            allOptions.AddRange(navigationOptions);
+            int totalOptions = allOptions.Count;
+
             string input = Console.ReadLine();
+
             if (int.TryParse(input, out int enteredNumber))
             {
                 if (enteredNumber >= 1 && enteredNumber <= totalOptions)
                 {
                     state = CLIScreenState.Complete;
-                    await options[enteredNumber - 1].Command(enteredNumber, string.IsNullOrEmpty(selectionHistory) ? options[enteredNumber - 1].Name : selectionHistory + " -> " + options[enteredNumber - 1].Name);
+                    await RunCommand(allOptions, enteredNumber);
                 }
-
-                else if (previousScreen != null && enteredNumber == totalOptions + 1)
-                {
-                    previousScreen.state = CLIScreenState.Incomplete; // show previous screen again.
-                    state = CLIScreenState.Complete;
-                    return;
-                }
-
                 else
                 {
                     inputValidationError = "Operation " + enteredNumber + " not found. Please enter the number for the operation you like to start.";
@@ -39,7 +36,6 @@ namespace CLIFramework
                 inputValidationError = "Invalid input. Please enter a number.";
                 return;
             }
-
         }
     }
 }
