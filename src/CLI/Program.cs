@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using CLI.Menus;
+using CLI.Utilities;
 using CLIFramework;
 using ScaleUnitManagement.ScaleUnitFeatureManager.Utilities;
 
@@ -25,32 +26,14 @@ namespace CLI
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine(ex.Message);
                 Console.WriteLine("\n" + argumentParser.HelpMessage());
                 return;
             }
 
-            var deployer = new Deployer();
+            var argumentHandler = new ArgumentHandler();
+            await argumentHandler.RunScripts(argumentParser);
 
-            if (argumentParser.CleanStorage)
-            {
-                await deployer.CleanStorage();
-            }
-
-            if (argumentParser.Deploy)
-            {
-                await deployer.Deploy();
-            }
-
-            if (argumentParser.DrainPipelines)
-            {
-                await deployer.DrainAllPipelines();
-            }
-
-            if (argumentParser.StartPipelines)
-            {
-                await deployer.StartAllPipelines();
-            }
         }
     }
 }
